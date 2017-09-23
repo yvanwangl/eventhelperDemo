@@ -4,7 +4,9 @@ let EventHelper = require('eventhelper');
 let fs = require('mz/fs');
 let path = require('path');
 
-app.use(express.static(path.join(__dirname, '/public')));
+//app.use(express.static(path.join(__dirname, '/public/dist')));
+//app.use(express.static(path.join(__dirname, '/assets')));
+app.use(express.static(path.join(__dirname, '/global')));
 let emmiter = new EventHelper();
 emmiter.on('read', (data)=> console.log(data));
 emmiter.all('read', 'readMore', (read, readMore)=> console.log(`${read}--${readMore}`))
@@ -13,7 +15,7 @@ fs.readFile('./mock/read.txt', 'utf-8', emmiter.done('read'));
 fs.readFile('./mock/readMore.txt', 'utf-8', emmiter.done('readMore'));
 
 app.get('/', (req, res)=>{
-    res.sendfile('public/index.html');
+    res.sendfile('index.html');
 })
 
 app.listen(3000);
