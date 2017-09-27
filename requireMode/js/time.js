@@ -1,3 +1,3 @@
-define('time1',[], function(){
+define('time',[], function(){
     return 300;
 });
