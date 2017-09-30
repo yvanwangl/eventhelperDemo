@@ -15,7 +15,7 @@
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.2",
     "babel-preset-env": "^1.6.0",
-    "eventhelper": "^1.0.0",
+    "eventhelper": "^1.0.1",
     "express": "^4.15.4",
     "mz": "^2.7.0",
     "webpack": "^3.6.0"

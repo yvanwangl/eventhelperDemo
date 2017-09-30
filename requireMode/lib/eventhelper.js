@@ -341,10 +341,15 @@
         let that = this;
         let count = 0;
         let resultArr = [];
+        let n;
         let wrapper = function (data) {
             count++;
             if (typeof data == 'object' && data.type == 'group' && data.hasOwnProperty('index')) {
-                resultArr[data['index']] = data['result'];
+                //此处逻辑是避免多次循环时，填充数据index错误
+                if(data['index']%times == 0){
+                    n = data['index']/times;
+                }
+                resultArr[data['index']-n*times] = data['result'];
             } else {
                 resultArr.push(data);
             }
