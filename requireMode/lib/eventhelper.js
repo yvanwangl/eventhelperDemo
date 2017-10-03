@@ -485,6 +485,42 @@
         };
     };
 
+    /**
+     * Concurrent, to handle async event concurrent
+     * @param {String} eventType
+     * @param {Number} limit
+     * @param {Function} asyncHandler
+     * @param {Array} asyncParams
+     */
+    EventHelper.prototype.concurrent = function(eventType, limit, asyncHandler, asyncParams){
+        let that = this;
+        let asyncParamsClone = [...asyncParams];
+        let queue = asyncParamsClone.splice(0, limit).map((param) => asyncHandler(param, that.group(eventType)));
+        let indexMap = {};
+        let resultArr = [];
+        let dataIndex, nextParam, indexMapKey, indexMapValue, handler;
+        [...new Array(limit)].map((item, index)=> indexMap[index] = index);
+        handler = (data)=> {
+            if(typeof data == 'object' && data.type == 'group' && data.hasOwnProperty('index')){
+                dataIndex = data.index;
+                //if asyncParamsClone's length does not equals to 0, then fill the queue
+                if(asyncParamsClone.length!=0){
+                    nextParam = asyncParamsClone.shift();
+                    indexMapValue = indexMap[dataIndex];
+                    queue.splice(indexMapValue, 1, asyncHandler(nextParam, that.group(eventType)));
+                    indexMapKey = asyncParams.findIndex(param=> nextParam == param);
+                    indexMap[indexMapKey] = indexMapValue;
+                }
+                resultArr[dataIndex] = data.result;
+                //if the last done , then fire 'finish' event
+                if(resultArr.length == asyncParams.length){
+                    that.emit(`${eventType}Finish`, resultArr);
+                }
+            }
+        };
+        return that.on(eventType, handler);
+    };
+
 
     /**
      * Create a new EventHelper.

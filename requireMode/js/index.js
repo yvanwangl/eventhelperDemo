@@ -5,7 +5,7 @@ requirejs.config({
     }
 });
 
-require(['eventhelper', 'js/time', 'js/imageList', 'js/promise'], function(eventhelper, time, imageList){
+require(['eventhelper', 'js/time', 'js/imageList', 'js/concurrent'], function(eventhelper, time, imageList){
 
     let emmiter = new eventhelper();
     let images = [];
