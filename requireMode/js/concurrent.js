@@ -12,7 +12,7 @@ define(['eventhelper','js/imageList'], function(EventHelper, imageList){
     };
     emmiter.concurrent('load', 5, loadImg, imageList.images);
     emmiter.on('loadFinish', (result)=> {
-        var imgs = result.map(img=> img.src);
-        console.log(imgs);
+        //var imgs = result.map(img=> img.src);
+        console.log(result);
     });
 });

@@ -341,10 +341,14 @@
         let that = this;
         let count = 0;
         let resultArr = [];
+        let n = 0;
         let wrapper = function (data) {
             count++;
             if (typeof data == 'object' && data.type == 'group' && data.hasOwnProperty('index')) {
-                resultArr[data['index']] = data['result'];
+                if(data['index']%times == 0){
+                    n = data['index']/times;
+                }
+                resultArr[data['index']-n*times] = data['result'];
             } else {
                 resultArr.push(data);
             }
@@ -410,6 +414,14 @@
             if (err) {
                 // put all arguments to the error handler
                 debug(`group for event: ${eventType}; item-${index} has an error: ${err.message}`);
+                err.index = index;
+                //emit eventType with data: undefined
+                that.emit(eventType, {
+                    type: 'group',
+                    index: index,
+                    // callback(err, args1, args2, ...)
+                    result: undefined
+                });
                 return that.emit.apply(that, ['error', eventType, err]);
             }
             that.emit(eventType, {
@@ -480,6 +492,42 @@
         };
     };
 
+    /**
+     * Concurrent, to handle async event concurrent
+     * @param {String} eventType
+     * @param {Number} limit
+     * @param {Function} asyncHandler
+     * @param {Array} asyncParams
+     */
+    EventHelper.prototype.concurrent = function(eventType, limit, asyncHandler, asyncParams){
+        let that = this;
+        let asyncParamsClone = [...asyncParams];
+        let queue = asyncParamsClone.splice(0, limit).map((param) => asyncHandler(param, that.group(eventType)));
+        let indexMap = {};
+        let resultArr = [];
+        let dataIndex, nextParam, indexMapKey, indexMapValue, handler, executeCount=0;
+        [...new Array(limit)].map((item, index)=> indexMap[index] = index);
+        handler = (data)=> {
+            if(typeof data == 'object' && data.type == 'group' && data.hasOwnProperty('index')){
+                executeCount++;
+                dataIndex = data.index;
+                //if asyncParamsClone's length does not equals to 0, then fill the queue
+                if(asyncParamsClone.length!=0){
+                    nextParam = asyncParamsClone.shift();
+                    indexMapValue = indexMap[dataIndex];
+                    queue.splice(indexMapValue, 1, asyncHandler(nextParam, that.group(eventType)));
+                    indexMapKey = asyncParams.findIndex(param=> nextParam == param);
+                    indexMap[indexMapKey] = indexMapValue;
+                }
+                resultArr[dataIndex] = data.result;
+                //execute count equal asyncParams length, then fire `${eventType}Finish`
+                if(executeCount == asyncParams.length){
+                    that.emit(`${eventType}Finish`, resultArr);
+                }
+            }
+        };
+        return that.on(eventType, handler);
+    };
 
     /**
      * Create a new EventHelper.

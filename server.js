@@ -4,9 +4,8 @@ let EventHelper = require('eventhelper');
 let fs = require('mz/fs');
 let path = require('path');
 
-//app.use(express.static(path.join(__dirname, '/public/dist')));
 //app.use(express.static(path.join(__dirname, '/assets')));
-//app.use(express.static(path.join(__dirname, '/global')));
+//app.use(express.static(path.join(__dirname, '/importMode/dist')));
 app.use(express.static(path.join(__dirname, '/requireMode')));
 let emmiter = new EventHelper();
 emmiter.on('read', (data)=> console.log(data));

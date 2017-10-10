@@ -28,10 +28,12 @@ define(['js/imageList'], function(imageList){
         return squence.reduce((last, url)=> {
             return last
                     .then(()=> Promise.race(promises))
+                    .catch(err=> console.log(err))
                     .then(({img, promise}) => {
                         let finishIndex = promises.findIndex(item=> item==promise);
                         promises.splice(finishIndex, 1);
                         promises.push(wrapHandler(url));
+                        console.log(promises);
                     });
         }, Promise.resolve()).then(()=> Promise.all(promises));
 
